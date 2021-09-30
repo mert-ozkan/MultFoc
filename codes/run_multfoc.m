@@ -64,7 +64,7 @@ instruction_page = TextPage(dr,'instructions');
 reaction_page = TextPage(dr,'reaction');
 % feedback_page = TextPage(dr).write_text(feedback_texts);
 
-scr = ExperimentScreen().set_origin(fixation_coordinates);
+scr = ExperimentScreen().open_window().set_origin(fixation_coordinates);
 kb = ExperimentKeyboard().set_reaction_keys(reaction_keys,reaction_key_codes);
 fix = BullsEyeCrossFixation(scr);
 disc_prop = combvec([1,2,3],polar_angle_first_disc+(0:(no_of_discs_per_ecc-1))*180/no_of_discs_per_ecc);
@@ -118,7 +118,7 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
     end
     disc.color.input(disc_clr);
     
-%     t = zeros(1,intv.no_of_frames);
+    scr.start_flip_test(intv);    
     for whFrm = 1:intv.no_of_frames
                 
         fix.draw();
@@ -136,7 +136,7 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
                 
         end
         
-        scr = scr.flip();
+        scr.flip_test();
         kb.check().quit_if_escaped();
         intv.end();
         if intv.trigger == 'P' && intv.previous.trigger ~= 'P'; trl.probes = trl.probes.next; end

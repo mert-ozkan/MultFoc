@@ -25,12 +25,6 @@ classdef ExperimentScreen < handle
         
     end
     
-    properties (Dependent)
-        
-        ifi
-        
-    end
-    
     properties (Access = private)
         
         flip_reliability = [];
@@ -162,12 +156,6 @@ classdef ExperimentScreen < handle
             scr.origin.absolute = scr.center + scr.origin.pix;
             
         end                
-        
-        function ifi = get.ifi(scr)
-            
-            ifi = 1/scr.frame_rate;
-            
-        end
         
         
         function tbl = get_table_of_parameters(scr)

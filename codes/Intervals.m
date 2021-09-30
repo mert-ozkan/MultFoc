@@ -60,6 +60,7 @@ classdef Intervals < matlab.mixin.Copyable
                 intv.isCreateEvent = isCreateEvent;
                 intv.durations(end) = [];
                 intv.triggers(end) = [];
+                intv.isFlickerOn(end) = [];
                            
                 intv.intervalF.trigger = [];                
             end
