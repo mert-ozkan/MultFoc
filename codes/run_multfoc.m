@@ -32,7 +32,6 @@ trg_cue = 'C'; %cue
 trg_arr = 'D'; %array of discs
 trg_probe = 'P';
 trg_rxn = 'R'; %response screen
-trg_fdbck = 'E'; %feedback (evaluation) screen
 
 precue_dur = .5;
 cue_dur = 1.5; % gon change in the block desgn
@@ -58,6 +57,7 @@ sub = Participant(dr,sxn.isDebug,sxn.isNew);
 sxn = sxn.get_initial_trial(sub);
 trl = Trial(sub,sxn);
 dat = Data(sub);
+trg = Timestamps(sub);
 
 
 instruction_page = TextPage(dr,'instructions');
@@ -86,7 +86,7 @@ arc_right = copy(arc_left).rotate(Angle(180));
 arc.Left = Shape(scr,arc_left.center).add_object(arc_right,'R').add_object(arc_left,'L');
 % Instruction Page
 scr.draw(instruction_page).flip();
-kb.wait_for_next();
+kb.wait_for_next().flush();
 
 disc_ids = struct('Right',[5,8,11],'Left',[14,17,20]);
 
@@ -118,7 +118,7 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
     end
     disc.color.input(disc_clr);
     
-    scr.start_flip_test(intv);    
+    scr.start_flip_test(intv);
     for whFrm = 1:intv.no_of_frames
                 
         fix.draw();
@@ -132,17 +132,20 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
                                 
                 disc.frame(whFrm).draw(3);
                 
-                arc.(hem).(trl.(sprintf('A%d',trl.probes.current))).select(trl.(sprintf('L%d',trl.probes.current))).draw();                
+                arc_side = trl.(sprintf('L%d',trl.probes.current));
+                arc.(hem).(trl.(sprintf('A%d',trl.probes.current))).select(arc_side).draw();                
                 
         end
         
         scr.flip_test();
         kb.check().quit_if_escaped();
+        if kb.isKeyPressed; 
+            trg.write(trl.no,trg_rxn,kb.time); kb.flush(); end
+        if intv.trigger ~= intv.previous.trigger
+            trg.write(trl.no,intv.trigger,scr.time);
+            if intv.trigger == 'P'; trl.probes.next(); end
+        end
         intv.end();
-        if intv.trigger == 'P' && intv.previous.trigger ~= 'P'; trl.probes = trl.probes.next; end
-        %         t(whFrm) = scr.flip_times.start_execution;
-        
-        
         
     end
     

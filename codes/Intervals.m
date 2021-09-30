@@ -164,7 +164,9 @@ classdef Intervals < matlab.mixin.Copyable
                 
                 prev_intv = copy(intv);
                 prev_intv.frames = prev_intv.frames.previous();
-                prev_intv.current = find(prev_intv.frames.no>=prev_intv.initial_frames_per_event,1,'last');
+                if ~isempty(prev_intv.frames)
+                    prev_intv.current = find(prev_intv.frames.no>=prev_intv.initial_frames_per_event,1,'last');
+                end
                 
             end             
                         

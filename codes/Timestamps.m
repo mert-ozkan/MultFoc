@@ -2,46 +2,45 @@ classdef Timestamps < handle
     
     properties
         
-        id
-        triggers
-        next_event
-        trial_no
+        file_id        
+        variable_names = {'trial_no','trigger','time'}
+        triggers cell
         
-    end
-    
-    properties (Access = private)
         
-        variable_names = {'trial_no','trigger','estimated_onset','onset','lag'}
-        
-    end
+    end    
     
     methods
         
-        function t = Timestamps(sub)                       
-            
+        function trg = Timestamps(sub,var_names)                       
+                     
             if sub.isNew
                 
-                t.id = fopen(sub.file.timestamps,'w');
-                fprintf(t.id,sprintf('%s,%s,%s,%s,%s\n',t.variable_names{1},t.variable_names{2},t.variable_names{3},t.variable_names{4},t.variable_names{5}));
+                trg.file_id = fopen(sub.file.timestamps,'w');
+                if nargin > 1; trg.variable_names = var_names; end
+                var_names = join(trg.variable_names,', ');
+                fprintf(trg.file_id,sprintf('%s\n',var_names{:}));
                 
             else
                 
-                t.id = fopen(sub.file.timestamps,'a+');
+                trg.file_id = fopen(sub.file.timestamps,'a+');
                 
             end
              
         end
         
-        function t = update_trial(t,trl_no)
+        function trg = write(trg,varargin)
             
-            t.trial_no= trl_no;
+            trg.triggers(end+1,:) = varargin;
             
         end
         
-        function send_trigger(t,scr_or_kb,ev)
+        function trg = flush(trg)
             
-            fprintf(t.id,'%d,%s,%.10f,%.10f,%.10f\n',t.trial_no,ev.get_trigger(),ev.get_onset(),scr_or_kb.time,ev.get_onset()-scr_or_kb.time);
-                    
+            trg.triggers = {};
+            
+        end
+        
+        function trg = print(trg)
         end
         
     end
