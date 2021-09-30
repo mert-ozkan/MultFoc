@@ -1,0 +1,15 @@
+﻿C1,C2,C3,Shape,Hemifield
+1,0,0,Single,Left
+0,1,0,Single,Left
+0,0,1,Single,Left
+1,1,0,Narrow,Left
+0,1,1,Narrow,Left
+1,0,1,Split,Left
+1,1,1,Broad,Left
+1,0,0,Single,Right
+0,1,0,Single,Right
+0,0,1,Single,Right
+1,1,0,Narrow,Right
+0,1,1,Narrow,Right
+1,0,1,Split,Right
+1,1,1,Broad,Right

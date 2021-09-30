@@ -1,0 +1,5 @@
+trial,cue1,cue2,hemifield,shape,target_no,response
+1,14,12,A,Broad,1,0
+2,13,0,L,Uni,0,0
+3,13,12,A,Narrow,1,1
+4,12,11,R,Narrow,0,0

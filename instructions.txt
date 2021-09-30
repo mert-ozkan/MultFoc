@@ -1,0 +1,28 @@
+In the next screen you will see a fixation target.
+Keep your eyes on the fixation target throughout the experiment.
+
+Before each trial, make sure you are directly looking at the fixation target.
+First, you will be introduced to an array of discs.
+Next, UP TO THREE discs will briefly turn RED.
+This is your CUE for which discs to attend to.
+You have to ATTEND the cued discs while keeping your eyes at the fixation target.
+Several BLACK ARCS will appear on the LEFT or RIGHT side of two discs at random intervals.
+We ask you to count certain configurations of the arcs as listed below:
+
+If only ONE disc was cued:    
+!! COUNT how many times an arc appeared on the LEFT side of the disc !!
+
+
+If TWO discs were cued:
+!! COUNT how many times the CUED DISCS had an ARC that points at the SAME SIDE (left or right)!!
+!! DO NOT COUNT if the arc appeared on the UNCUED DISC!!
+
+
+If THREE discs were cued:
+!! COUNT how many times the CUED DISCS had an ARC that points at the SAME SIDE (left or right)!!
+
+You will report the number by pressing the number key in the response screen at the end of each trial.
+
+C = 0   V=1   B=2   N=3
+
+When ready, press SPACE BAR to proceed to next screen!
