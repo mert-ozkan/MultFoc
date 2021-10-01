@@ -150,6 +150,7 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
         
     end
     
+    trg.print();
     trl.end();
     
 end
