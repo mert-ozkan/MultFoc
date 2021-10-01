@@ -8,10 +8,12 @@ classdef ExperimentKeyboard < handle
         key char
         isValid logical
         time double
+        release_time double
         escape_key char = 'escape'
         next_key char = 'space'
         reaction_keys cell        
         correspondence
+        isKeyReleased logical = false
         
     end
     
@@ -20,7 +22,7 @@ classdef ExperimentKeyboard < handle
         key_code
         escape_code
         next_code 
-        reaction_codes
+        reaction_codes        
         
     end
     
@@ -29,7 +31,7 @@ classdef ExperimentKeyboard < handle
         function kb = ExperimentKeyboard()
             
             PsychHID('UnifyKeyNames');
-            PsychHID('KbQueueCreate');
+            KbQueueCreate();
             
         end
         
@@ -43,20 +45,29 @@ classdef ExperimentKeyboard < handle
         
         function kb = start(kb)
             
-            PsychHID('KbQueueStart');
+            KbQueueStart();
             
         end
         
         function kb = flush(kb)
             
-            PsychHID('KbQueueFlush');
-            kb.isEscaped = false;
-            kb.isKeyPressed = false;
-            kb.isAccurate = logical.empty();
-            kb.isValid = logical.empty();
-            kb.key = '';
-            kb.time = [];            
+            if kb.isKeyPressed && kb.isKeyReleased; KbQueueFlush(); end
+                        
+        end
+        
+        function kb = reset(kb)
             
+            if kb.isKeyPressed
+                
+                kb.isEscaped = false;
+                kb.isKeyPressed = false;
+                kb.isAccurate = logical.empty();
+                kb.isValid = logical.empty();
+                kb.key = '';
+                kb.time = [];         
+                
+            end
+
             
         end
         
@@ -114,15 +125,21 @@ classdef ExperimentKeyboard < handle
         
         function kb = check(kb)
             
-            [isKeyDown, t, key_codes, ~] = KbCheck();
+            [isKeyDown, press_t, release_t] = KbQueueCheck();
+            
+%             [isKeyDown, t, key_codes, ~] = KbCheck();
             
             if isKeyDown
                 
-                kb.flush();
                 kb.isKeyPressed = true;
-                kb.key = KbName(key_codes);
+                press_codes = press_t > 0;
+                if sum(press_codes) > 1; kb.isValid = false; return; end
+                kb.release_time = release_t(press_codes);
+                kb.isKeyReleased = kb.release_time > 0;                               
+                kb.key = KbName(press_codes);
                 kb.isEscaped = strcmpi(kb.key,kb.escape_key);                
-                kb.time = t;
+                kb.time = press_t(press_codes);
+                kb.flush();
                 
             end
             

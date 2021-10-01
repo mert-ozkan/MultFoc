@@ -42,6 +42,8 @@ probe_dur = .15;
 min_isi = 1;
 posttest_dur = .3;
 
+% refractory_period = 
+
 latest_rxn = 1; % it is fixed right now, gonna change
 fdbck_dur = .1;
 
@@ -67,6 +69,9 @@ reaction_page = TextPage(dr,'reaction');
 scr = ExperimentScreen().open_window().set_origin(fixation_coordinates);
 kb = ExperimentKeyboard().set_reaction_keys(reaction_keys,reaction_key_codes);
 fix = BullsEyeCrossFixation(scr);
+
+
+
 disc_prop = combvec([1,2,3],polar_angle_first_disc+(0:(no_of_discs_per_ecc-1))*180/no_of_discs_per_ecc);
 disc_prop(3,:) = disc_radii(disc_prop(1,:));
 disc_prop(1,:) = stimulus_eccentricities(disc_prop(1,:));
@@ -86,7 +91,7 @@ arc_right = copy(arc_left).rotate(Angle(180));
 arc.Left = Shape(scr,arc_left.center).add_object(arc_right,'R').add_object(arc_left,'L');
 % Instruction Page
 scr.draw(instruction_page).flip();
-kb.wait_for_next().flush();
+kb.start().wait_for_next().flush().reset();
 
 disc_ids = struct('Right',[5,8,11],'Left',[14,17,20]);
 
@@ -113,12 +118,11 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
     disc_clr = ones(intv.no_of_frames, disc.no_of_items);    
     disc_clr(:,disc_ids.(hem)) = [intv.frames.f175;intv.frames.f21;intv.frames.f19]';
     if isCueTrial
-        disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frame_counts(intv.triggers=='C')),disc_ids.(hem)) = 1;
-        disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frame_counts(intv.triggers=='C')),cued_discs) = 4;
+        disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frames_per_event(intv.triggers=='C')),disc_ids.(hem)) = 1;
+        disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frames_per_event(intv.triggers=='C')),cued_discs) = 4;
     end
     disc.color.input(disc_clr);
     
-    scr.start_flip_test(intv);
     for whFrm = 1:intv.no_of_frames
                 
         fix.draw();
@@ -132,24 +136,21 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
                                 
                 disc.frame(whFrm).draw(3);
                 
-                arc_side = trl.(sprintf('L%d',trl.probes.current));
-                arc.(hem).(trl.(sprintf('A%d',trl.probes.current))).select(arc_side).draw();                
+                arc_loc = trl.(sprintf('L%d',trl.probes.current));
+                arc.(hem).(trl.(sprintf('A%d',trl.probes.current))).select(arc_loc).draw();                
                 
         end
         
-        scr.flip_test();
-        kb.check().quit_if_escaped();
-        if kb.isKeyPressed; 
-            trg.write(trl.no,trg_rxn,kb.time); kb.flush(); end
-        if intv.trigger ~= intv.previous.trigger
-            trg.write(trl.no,intv.trigger,scr.time);
-            if intv.trigger == 'P'; trl.probes.next(); end
-        end
+        scr.flip();        
+        kb.check().flush().quit_if_escaped();
+        trg.write_if(kb.isKeyPressed,trl.no,trg_rxn,kb.time).write_if(intv.isEventOnset,trl.no,intv.trigger,scr.time);
+        trl.probes.next(intv.isEventOffset && intv.trigger == trg_probe); 
         intv.end();
+        kb.reset();
         
     end
     
-    trl = trl.end();
+    trl.end();
     
 end
 

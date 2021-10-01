@@ -34,6 +34,16 @@ classdef Timestamps < handle
             
         end
         
+        function trg = write_if(trg,isWrite,varargin)
+            
+            if isWrite
+                
+                trg.write(varargin{:}); 
+            
+            end
+            
+        end
+        
         function trg = flush(trg)
             
             trg.triggers = {};
@@ -41,6 +51,9 @@ classdef Timestamps < handle
         end
         
         function trg = print(trg)
+            
+           
+            
         end
         
     end

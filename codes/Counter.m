@@ -45,8 +45,10 @@ classdef Counter < handle
             
         end
         
-        function ct = next(ct)
+        function ct = next(ct,isNext)
             
+            if nargin < 1; isNext = true; end
+            if ~isNext; return; end
             if ct.isComplete; return; end
             ct.step = ct.step + 1;
             

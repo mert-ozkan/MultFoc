@@ -7,7 +7,7 @@ classdef Intervals < matlab.mixin.Copyable
         current uint64 = 1
         durations double
         triggers char          
-        frame_counts uint64             
+        frames_per_event uint64             
         
         frames Frames
         
@@ -22,6 +22,9 @@ classdef Intervals < matlab.mixin.Copyable
         duration
         trigger
         initial_frames_per_event
+        final_frames_per_event
+        isEventOnset
+        isEventOffset
         
     end
     
@@ -186,7 +189,9 @@ classdef Intervals < matlab.mixin.Copyable
                 
                 next_intv = copy(intv);
                 next_intv.frames = next_intv.frames.next();
-                intv.current = find(next_intv.frames.no>=next_intv.initial_frames_per_event,1,'last');
+                if ~isempty(next_intv.frames)
+                    intv.current = find(next_intv.frames.no>=next_intv.initial_frames_per_event,1,'last');
+                end
                 
             end             
                         
@@ -224,7 +229,13 @@ classdef Intervals < matlab.mixin.Copyable
         
         function frms = get.initial_frames_per_event(intv)
             
-            frms = cumsum([1,intv.frame_counts(1:end-1)]);
+            frms = cumsum([1,intv.frames_per_event(1:end-1)]);
+            
+        end
+        
+        function frms = get.final_frames_per_event(intv)
+            
+            frms = intv.initial_frames_per_event+intv.frames_per_event-1;
             
         end
         
@@ -237,11 +248,11 @@ classdef Intervals < matlab.mixin.Copyable
         function intv = create_frames(intv,scr,varargin)
             
             intv.frames = Frames.empty();
-            intv.frame_counts = zeros(1,intv.no_of_intervals);
+            intv.frames_per_event = zeros(1,intv.no_of_intervals);
             for whIntv = 1:intv.no_of_intervals
                 frmN = Frames(scr,intv.durations(whIntv));
                 frmN.isFlickerOn = intv.isFlickerOn(whIntv);
-                intv.frame_counts(whIntv) = frmN.total;
+                intv.frames_per_event(whIntv) = frmN.total;
                 intv.frames = intv.frames.append(frmN);                
             end
             
@@ -260,6 +271,18 @@ classdef Intervals < matlab.mixin.Copyable
         function isFlickerOn = get_flicker_events(intv)
             
             isFlickerOn = intv.isFlickerOn;
+            
+        end
+        
+        function isNew = get.isEventOnset(intv)
+            
+            isNew = ismember(intv.frames.no,intv.initial_frames_per_event);
+            
+        end
+        
+        function isNew = get.isEventOffset(intv)
+            
+            isNew = ismember(intv.frames.no,intv.final_frames_per_event);
             
         end
         
