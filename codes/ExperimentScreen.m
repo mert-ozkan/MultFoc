@@ -4,10 +4,10 @@ classdef ExperimentScreen < handle
     
     properties
         
-        viewing_distance = 38%57
+        viewing_distance = 57
         background_color = [127, 127, 127, 255]
         isBlend = true
-        isSkipSyncTests = 1
+        isSkipSyncTests double = 1
         rect = []
         blend_source_factor = "GL_SRC_ALPHA"
         blend_destination_factor = "GL_ONE_MINUS_SRC_ALPHA"
@@ -40,21 +40,16 @@ classdef ExperimentScreen < handle
     
     methods
         
-        function scr = ExperimentScreen(viewing_distance,background_color,isBlend,isSkipSyncTests,rect,blend_source_factor,blend_destination_factor)
+        function scr = ExperimentScreen(viewing_distance,isSkipSyncTests,background_color,rect,isBlend,blend_source_factor,blend_destination_factor)
             
-            if nargin > 0
+            if nargin > 0; scr.viewing_distance = viewing_distance; end
+            if nargin > 1; scr.isSkipSyncTests = isSkipSyncTests; end
+            if nargin > 2; scr.background_color = background_color; end % change it to RGBA class
+            if nargin > 3; scr.rect = rect; end
+            if nargin > 4; scr.isBlend = isBlend; end
+            if scr.isBlend && nargin > 5; scr.blend_source_factor = blend_source_factor; end
+            if scr.isBlend && nargin > 6; scr.blend_destination_factor = blend_destination_factor; end
                 
-                scr.viewing_distance = viewing_distance;
-                scr.background_color = background_color;
-                scr.isBlend = isBlend;
-                scr.isSkipSyncTests = isSkipSyncTests;
-                scr.rect = rect;
-                scr.blend_source_factor = blend_source_factor;
-                scr.blend_destination_factor = blend_destination_factor;
-                
-            end
-            
-            
             scr.PsychSetUp();            
                         
         end

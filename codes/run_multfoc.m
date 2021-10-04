@@ -3,7 +3,9 @@
 clear all; close all; sca;
 
 %% Parameters
-parent_path = 'C:\Users\f0052jm\Desktop\EXPERIMENTS\Mert\MultFoc';
+parent_path = '/Users/mertozkan/Dropbox (Dartmouth College)/DataCollection/MultFoc';
+viewing_distance = 57;
+isSkipSyncTests = 1;
 
 stimulus_eccentricities = [7,10.5,16]; % eccentricity in dva
 disc_radii = [1.1,1.9,2.7]; % disc radius per eccentricity in dva
@@ -24,7 +26,7 @@ stim_clr = RGBA().set_lookup_table(255,0,127,[255,0,0]);
 
 test_disc_id = [5,8,11,14,17,20]; % this ugly; gon change.
 
-arc_color = 127;% [255,0,0]';
+arc_color = 127;
 
 % Event triggers: trigger per stimulus display and keypress (latter not ready)
 trg_fix = 'F'; %fixation
@@ -58,7 +60,7 @@ sxn = Session('try');
 sub = Participant(dr,sxn.isDebug,sxn.isNew);
 sxn = sxn.get_initial_trial(sub);
 trl = Trial(sub,sxn);
-dat = DataFile(sub,'data',{'trial_no','cue1','cue2','cue3','shape','hemifield','no_of_targets','no_of_event','isTarget','event_order','target_order','response','response_time'});
+dat = DataFile(sub,'data',{'trial_no','cue1','cue2','cue3','shape','hemifield','no_of_targets','no_of_event','response_key','response_time','latest_probe_onset','latest_probe_location','latest_probe_side'});
 trg = DataFile(sub,'timestamps',{'trial_no','trigger','time'});
 
 
@@ -66,7 +68,7 @@ instruction_page = TextPage(dr,'instructions');
 reaction_page = TextPage(dr,'reaction');
 % feedback_page = TextPage(dr).write_text(feedback_texts);
 
-scr = ExperimentScreen().open_window().set_origin(fixation_coordinates);
+scr = ExperimentScreen(viewing_distance,isSkipSyncTests).open_window().set_origin(fixation_coordinates);
 kb = ExperimentKeyboard().set_reaction_keys(reaction_keys,reaction_key_codes);
 fix = BullsEyeCrossFixation(scr);
 
@@ -144,6 +146,8 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
         scr.flip();        
         kb.check().flush().quit_if_escaped();
         trg.write_if(kb.isKeyPressed,trl.no,trg_rxn,kb.time).write_if(intv.isEventOnset,trl.no,intv.trigger,scr.time);
+%         'trial_no','cue1','cue2','cue3','shape','hemifield','no_of_targets','no_of_event','isTarget','location','event_order','target_order','response','response_time'
+        dat.write_if(kb.isKeyPressed,trl.no,trl.C1,trl.C2,trl.C3,trl.Shape,trl.Hemifield,trl.no_of_targets,trl.no_of_events);
         trl.probes.next(intv.isEventOffset && intv.trigger == trg_probe); 
         intv.end();
         kb.reset();
