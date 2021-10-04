@@ -58,8 +58,8 @@ sxn = Session('try');
 sub = Participant(dr,sxn.isDebug,sxn.isNew);
 sxn = sxn.get_initial_trial(sub);
 trl = Trial(sub,sxn);
-dat = Data(sub);
-trg = Timestamps(sub);
+dat = DataFile(sub,'data',{'trial_no','cue1','cue2','cue3','shape','hemifield','no_of_targets','no_of_event','isTarget','event_order','target_order','response','response_time'});
+trg = DataFile(sub,'timestamps',{'trial_no','trigger','time'});
 
 
 instruction_page = TextPage(dr,'instructions');

@@ -4,7 +4,7 @@ classdef DataFile < handle
         
         file_id
         file_path
-        variable_names
+        variable_names cell = {}
         data cell
         
     end
@@ -33,24 +33,38 @@ classdef DataFile < handle
     
     methods
         
-        function df = Timestamps(sub,var_names)
+        function df = DataFile(varargin)
+            % DataFile(isNew, file_path, variable_names)
+            % DataFile(sub, fieldname, variable_names)
+            n_arg = length(varargin);
+            switch class(varargin{1})
+                case 'Participant'
+                    
+                    isNew = varargin{1}.isNew;
+                    df.file_path = varargin{1}.file.(varargin{2});                    
+                
+                case {'logical','double'}
+                    
+                    isNew = varargin{1};
+                    df.file_path = varargin{2}; 
+                    
+                otherwise
+                    
+                    error('Wrong input class.')
+                
+            end
             
-            if sub.isNew
+            if n_arg > 2; df.variable_names = varargin{3}; end
+            
+            if isNew               
                 
-                df.file_path = sub.file.timestamps;
                 df.file_id = fopen(df.file_path,'w');
-                if nargin > 1
-                    
-                    df.variable_names = var_names;
-                    var_names = join(df.variable_names,df.delimiter);
-                    fprintf(df.file_id,sprintf('%s\n',var_names{:}));
-                    
-                end
-                
+                var_names = join(df.variable_names,df.delimiter);
+                fprintf(df.file_id,sprintf('%s\n',var_names{:}));                
                 
             else
                 
-                df.file_id = fopen(sub.file.timestamps,'a+');
+                df.file_id = fopen(df.file_path,'a+');
                 
             end
             
