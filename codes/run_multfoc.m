@@ -3,11 +3,11 @@
 clear all; close all; sca;
 
 %% Parameters
-parent_path = '/Users/mertozkan/Dropbox (Dartmouth College)/DataCollection/MultFoc';
+parent_path = 'C:\Users\f0052jm\Desktop\EXPERIMENTS\Mert\MultFoc';
 
-stimulus_eccentricities = [6,9.5,15]; % eccentricity in dva
-disc_radii = [1,1.7,2.5]; % disc radius per eccentricity in dva
-fixation_coordinates = [0,-12]; % with respect to screen center (if
+stimulus_eccentricities = [7,10.5,16]; % eccentricity in dva
+disc_radii = [1.1,1.9,2.7]; % disc radius per eccentricity in dva
+fixation_coordinates = [0,-10]; % with respect to screen center (if
 % cartesian coordinates, negative values signifies up in y-axis and left in
 % x-axis)
 
@@ -19,12 +19,12 @@ polar_angle_first_disc = 11.25; % in degrees. Polar coordinates of the
 % length constitutes polar coordinates. 0 degrees points to the east-end,
 % an x-degree clockwise rotation is positive (+x; -x if counter-clockwise).
 disc_color = [255;255;255;255]; % rows correspond to [R; G; B; Alpha]
-arc_pw = .1;
+arc_pw = .05;
 stim_clr = RGBA().set_lookup_table(255,0,127,[255,0,0]);
 
 test_disc_id = [5,8,11,14,17,20]; % this ugly; gon change.
 
-arc_color = [255,0,0]';
+arc_color = 127;% [255,0,0]';
 
 % Event triggers: trigger per stimulus display and keypress (latter not ready)
 trg_fix = 'F'; %fixation
@@ -83,10 +83,10 @@ start_angles_right = Angle(90)+disc.center.polar.angle.select(test_disc_id(1:3))
 start_angles_left = Angle(90)+disc.center.polar.angle.select(test_disc_id(4:6)) + Angle(45);
 
 % this ugly; gon change
-arc_left = disc.select(test_disc_id(1:3)).scale(.75).circ2arc(start_angles_right,Angle(90),SpatialUnit(scr,arc_pw)).set_color(arc_color);
+arc_left = disc.select(test_disc_id(1:3)).scale(.5).circ2arc(start_angles_right,Angle(90),SpatialUnit(scr,arc_pw)).set_color(arc_color);
 arc_right = copy(arc_left).rotate(Angle(180));
 arc.Right = Shape(scr,arc_left.center).add_object(arc_right,'R').add_object(arc_left,'L');
-arc_left = disc.select(test_disc_id(4:6)).scale(.75).circ2arc(start_angles_left,Angle(90),SpatialUnit(scr,arc_pw)).set_color(arc_color);
+arc_left = disc.select(test_disc_id(4:6)).scale(.5).circ2arc(start_angles_left,Angle(90),SpatialUnit(scr,arc_pw)).set_color(arc_color);
 arc_right = copy(arc_left).rotate(Angle(180));
 arc.Left = Shape(scr,arc_left.center).add_object(arc_right,'R').add_object(arc_left,'L');
 % Instruction Page

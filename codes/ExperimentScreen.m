@@ -4,13 +4,13 @@ classdef ExperimentScreen < handle
     
     properties
         
-        viewing_distance = 57;
-        background_color = [127, 127, 127, 255];
-        isBlend = true;
-        isSkipSyncTests = 1;
+        viewing_distance = 38%57
+        background_color = [127, 127, 127, 255]
+        isBlend = true
+        isSkipSyncTests = 1
         rect = []
-        blend_source_factor = "GL_SRC_ALPHA";
-        blend_destination_factor = "GL_ONE_MINUS_SRC_ALPHA";
+        blend_source_factor = "GL_SRC_ALPHA"
+        blend_destination_factor = "GL_ONE_MINUS_SRC_ALPHA"
         
         origin SpatialUnit
         
