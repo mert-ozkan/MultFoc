@@ -100,7 +100,8 @@ disc_ids = struct('Right',[5,8,11],'Left',[14,17,20]);
 isCueTrial = true;
 while trl.no <= trl.no_of_trials && ~kb.isEscaped
     
-    trl = trl.add_counter('probes',trl.no_of_events);
+%     trl = trl.add_counter('probes',trl.no_of_events);
+    trl = trl.add_tracker('probes',{'E1','E2','E3','E4','E5';'L1','L2','L3','L4','L5';'A1','A2','A3','A4','A5'},{'isTarget','Location','Side'});
     [c1,c2,c3,hem] = trl.get('C1','C2','C3','Hemifield');
     cued_discs = disc_ids.(hem)(logical([c1,c2,c3]));
     if trl.no ~= sxn.initial_trial
@@ -120,8 +121,10 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
     disc_clr = ones(intv.no_of_frames, disc.no_of_items);    
     disc_clr(:,disc_ids.(hem)) = [intv.frames.f175;intv.frames.f21;intv.frames.f19]';
     if isCueTrial
+        
         disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frames_per_event(intv.triggers=='C')),disc_ids.(hem)) = 1;
         disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frames_per_event(intv.triggers=='C')),cued_discs) = 4;
+        
     end
     disc.color.input(disc_clr);
     
@@ -138,8 +141,7 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
                                 
                 disc.frame(whFrm).draw(3);
                 
-                arc_loc = trl.(sprintf('L%d',trl.probes.current));
-                arc.(hem).(trl.(sprintf('A%d',trl.probes.current))).select(arc_loc).draw();                
+                arc.(hem).(trl.probes.Side()).select(trl.probes.Location()).draw();                
                 
         end
         
@@ -147,7 +149,7 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
         kb.check().flush().quit_if_escaped();
         trg.write_if(kb.isKeyPressed,trl.no,trg_rxn,kb.time).write_if(intv.isEventOnset,trl.no,intv.trigger,scr.time);
 %         'trial_no','cue1','cue2','cue3','shape','hemifield','no_of_targets','no_of_event','isTarget','location','event_order','target_order','response','response_time'
-        dat.write_if(kb.isKeyPressed,trl.no,trl.C1,trl.C2,trl.C3,trl.Shape,trl.Hemifield,trl.no_of_targets,trl.no_of_events);
+%         dat.write_if(kb.isKeyPressed,trl.no,trl.C1,trl.C2,trl.C3,trl.Shape,trl.Hemifield,trl.no_of_targets,trl.no_of_events);
         trl.probes.next(intv.isEventOffset && intv.trigger == trg_probe); 
         intv.end();
         kb.reset();

@@ -1,1 +1,1 @@
-trial_no,cue1,cue2,cue3,shape,hemifield,no_of_targets,no_of_event,isTarget,event_order,target_order,response,response_time
+trial_no,cue1,cue2,cue3,shape,hemifield,no_of_targets,no_of_event,response_key,response_time,latest_probe_onset,latest_probe_location,latest_probe_side

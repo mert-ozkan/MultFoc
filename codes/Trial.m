@@ -111,14 +111,23 @@ classdef Trial < dynamicprops & matlab.mixin.Copyable
             trl.(counter_name) = Counter(limit);
             
             
-        end
+        end        
         
         function trl = add_timer(trl,timer_name,duration)
             
             if ~isprop(trl,timer_name); p = trl.addprop(timer_name); p.NonCopyable = false; end
             trl.(timer_name) = Timer(duration);
             
-        end        
+        end
+        
+        function trl = add_tracker(trl,tracker_name,varargin)
+            
+            if ~isprop(trl,tracker_name); p = trl.addprop(tracker_name); p.NonCopyable = false; end
+            
+            trl.(tracker_name) = Tracker(trl,varargin{:});
+            
+            
+        end
        
     end
     
