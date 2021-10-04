@@ -60,8 +60,10 @@ sxn = Session('try');
 sub = Participant(dr,sxn.isDebug,sxn.isNew);
 sxn = sxn.get_initial_trial(sub);
 trl = Trial(sub,sxn);
-dat = DataFile(sub,'data',{'trial_no','cue1','cue2','cue3','shape','hemifield','no_of_targets','no_of_event','response_key','response_time','latest_probe_onset','latest_probe_location','latest_probe_side'});
-trg = DataFile(sub,'timestamps',{'trial_no','trigger','time'});
+dat = DataFile(sub,'data',{'trial_no','cue1','cue2','cue3','shape','hemifield',...
+    'no_of_targets','no_of_events',...
+    'response_key','response_time','latest_probe_onset','latest_probe_location','latest_probe_side'});
+trg = Triggers(sub,'timestamps');
 
 
 instruction_page = TextPage(dr,'instructions');
@@ -148,8 +150,8 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
         scr.flip();        
         kb.check().flush().quit_if_escaped();
         trg.write_if(kb.isKeyPressed,trl.no,trg_rxn,kb.time).write_if(intv.isEventOnset,trl.no,intv.trigger,scr.time);
-%         'trial_no','cue1','cue2','cue3','shape','hemifield','no_of_targets','no_of_event','isTarget','location','event_order','target_order','response','response_time'
-%         dat.write_if(kb.isKeyPressed,trl.no,trl.C1,trl.C2,trl.C3,trl.Shape,trl.Hemifield,trl.no_of_targets,trl.no_of_events);
+        dat.write_if(kb.isKeyPressed,trl.no,trl.C1,trl.C2,trl.C3,trl.Shape,trl.Hemifield,trl.no_of_targets,trl.no_of_events,kb.key,kb.time,trg.last_time('P'),trl.probes.Location(),trl.probes.Side());
+        
         trl.probes.next(intv.isEventOffset && intv.trigger == trg_probe); 
         intv.end();
         kb.reset();
@@ -157,6 +159,7 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
     end
     
     trg.print();
+    dat.print();
     trl.end();
     
 end

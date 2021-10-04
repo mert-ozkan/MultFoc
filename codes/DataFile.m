@@ -174,10 +174,13 @@ classdef DataFile < handle
             end
         end
         
-        function tbl = show(df)
+        function tbl = show_data(df)
             
             tbl = readtable(df.file_path);
             
+        end
+        
+        function op = last_when(df,var_name)
         end
         
     end
