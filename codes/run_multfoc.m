@@ -29,25 +29,21 @@ test_disc_id = [5,8,11,14,17,20]; % this ugly; gon change.
 arc_color = 127;
 
 % Event triggers: trigger per stimulus display and keypress (latter not ready)
+trg_brk = 'B';
 trg_fix = 'F'; %fixation
 trg_cue = 'C'; %cue
 trg_arr = 'D'; %array of discs
 trg_probe = 'P';
 trg_rxn = 'R'; %response screen
 
-precue_dur = .5;
+precue_dur = 1;
 cue_dur = 1.5; % gon change in the block desgn
-prestim_dur = .8;
+prestim_dur = 1;
 pretest_dur = .5;
 test_dur = 6;
 probe_dur = .15;
 min_isi = 1;
-posttest_dur = .3;
-
-% refractory_period = 
-
-latest_rxn = 1; % it is fixed right now, gonna change
-fdbck_dur = .1;
+posttest_dur = .8;
 
 reaction_keys = {'RightArrow','LeftArrow'};
 reaction_key_codes = 'RL'; % 'c' for 0, 'v' for 1 etc.
@@ -68,7 +64,6 @@ trg = Triggers(sub,'timestamps');
 
 instruction_page = TextPage(dr,'instructions');
 reaction_page = TextPage(dr,'reaction');
-% feedback_page = TextPage(dr).write_text(feedback_texts);
 
 scr = ExperimentScreen(viewing_distance,isSkipSyncTests).open_window().set_origin(fixation_coordinates);
 kb = ExperimentKeyboard().set_reaction_keys(reaction_keys,reaction_key_codes);
@@ -102,16 +97,17 @@ disc_ids = struct('Right',[5,8,11],'Left',[14,17,20]);
 isCueTrial = true;
 while trl.no <= trl.no_of_trials && ~kb.isEscaped
     
-%     trl = trl.add_counter('probes',trl.no_of_events);
+%     trl = trl.add_counter('break',);
     trl = trl.add_tracker('probes',{'E1','E2','E3','E4','E5';'L1','L2','L3','L4','L5';'A1','A2','A3','A4','A5'},{'isTarget','Location','Side'});
     [c1,c2,c3,hem] = trl.get('C1','C2','C3','Hemifield');
-    cued_discs = disc_ids.(hem)(logical([c1,c2,c3]));
+    cued_discs = disc_ids.(hem)(logical([c1,c2,c3]));    
     if trl.no ~= sxn.initial_trial
         [p_c1,p_c2,p_c3,p_hem] = trl.previous.get('C1','C2','C3','Hemifield');
         isCueTrial = ~all([c1==p_c1,c2==p_c2,c3==p_c3,strcmp(hem,p_hem)]);
     end
     
     intv = Intervals()...
+        .add_interval([],trg_brk).conditional(isBreakTrial)...
         .add_interval(precue_dur,trg_fix).conditional(isCueTrial)... % fixation
         .add_interval(cue_dur,trg_cue).conditional(isCueTrial)... % Cue
         .add_interval(prestim_dur,trg_fix)... % Fixation

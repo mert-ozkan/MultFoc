@@ -7,7 +7,7 @@ classdef Intervals < matlab.mixin.Copyable
         current uint64 = 1
         durations double
         triggers char          
-        frames_per_event uint64             
+        frames_per_event uint64           
         
         frames Frames
         
@@ -33,6 +33,7 @@ classdef Intervals < matlab.mixin.Copyable
         intervalF struct = struct('type',[],'trigger',[],'isCreateEvent',[])
         isCreateEvent logical
         isFlickerOn logical
+        isIndefinite logical
         
     end
     
