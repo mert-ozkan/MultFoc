@@ -14,6 +14,7 @@ classdef Trial < dynamicprops & matlab.mixin.Copyable
         no_of_variables
         no_of_trials
         no_of_incomplete_trials
+        isConditionSwitch
         
     end
     
@@ -96,6 +97,26 @@ classdef Trial < dynamicprops & matlab.mixin.Copyable
         function n = get.no_of_variables(trl)
             
             n = length(trl.variables);
+            
+        end
+        
+        function isSwitch = get.isConditionSwitch(trl)
+            
+            if trl.no ~= 1
+                
+                prev_var = cell(1,trl.no_of_variables);
+                var = prev_var;
+                [var{:}] = trl.get(trl.variables{:});
+                [prev_var{:}] = trl.previous.get(trl.variables{:}); 
+                isSwitch = array2table(cellfun(@(x,y) length(x) ~= length(y) || all(x~=y), var,prev_var),'VariableNames',trl.variables);
+                
+            else
+                
+                isSwitch = array2table(ones(1,trl.no_of_variables)==1,'VariableNames',trl.variables);
+
+                
+            end
+            
             
         end
         

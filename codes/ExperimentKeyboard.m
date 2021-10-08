@@ -7,7 +7,7 @@ classdef ExperimentKeyboard < handle
         isAccurate logical
         key char
         isValid logical
-        time double
+        press_time double
         release_time double
         escape_key char = 'escape'
         next_key char = 'space'
@@ -17,7 +17,7 @@ classdef ExperimentKeyboard < handle
         
     end
     
-    properties (Dependent)
+    properties (Dependent, Access = private)
         
         key_code
         escape_code
@@ -64,7 +64,7 @@ classdef ExperimentKeyboard < handle
                 kb.isAccurate = logical.empty();
                 kb.isValid = logical.empty();
                 kb.key = '';
-                kb.time = [];         
+                kb.press_time = [];         
                 
             end
 
@@ -73,7 +73,7 @@ classdef ExperimentKeyboard < handle
         
         function kb = stop(kb)
             
-            PsychHID('KbQueueStop');
+            KbQueueStop();
             
         end
         
@@ -87,7 +87,7 @@ classdef ExperimentKeyboard < handle
             
         end
         
-        function kb = wait_for_next(kb,wait_secs)
+        function kb = wait_for_next_key(kb,wait_secs)
             
             if nargin < 2; wait_secs = inf; end
             kb = kb.wait_for_key_press(kb.next_key,wait_secs);
@@ -113,13 +113,15 @@ classdef ExperimentKeyboard < handle
             
             if nargin < 3; wait_secs = inf; end
             
+            kb.stop();
             [t, key_codes, ~] = KbPressWait([],wait_secs);
             kb.isKeyPressed = sum(key_codes(KbName(key)));
             kb.isEscaped = key_codes(kb.escape_code);
             kb.key = KbName(find(key_codes));
-            kb.time = t;
-            
+            kb.press_time = t;
+                        
             kb.quit_if_escaped();
+            kb.start();
 
         end
         
@@ -138,7 +140,7 @@ classdef ExperimentKeyboard < handle
                 kb.isKeyReleased = kb.release_time > 0;                               
                 kb.key = KbName(press_codes);
                 kb.isEscaped = strcmpi(kb.key,kb.escape_key);                
-                kb.time = press_t(press_codes);
+                kb.press_time = press_t(press_codes);
                 kb.flush();
                 
             end
@@ -149,8 +151,8 @@ classdef ExperimentKeyboard < handle
         function kb = quit_if_escaped(kb)
             
             if kb.isEscaped
-                Screen('CloseAll');
-                disp('Screen closed by key press.');
+                sca;
+                warning('Screen closed by key press.');
             end
             
         end

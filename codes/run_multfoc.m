@@ -38,16 +38,17 @@ trg_rxn = 'R'; %response screen
 
 precue_dur = 1;
 cue_dur = 1.5; % gon change in the block desgn
-prestim_dur = 1;
-pretest_dur = .5;
+prestim_dur = .5;
+pretest_dur = 1;
 test_dur = 6;
 probe_dur = .15;
 min_isi = 1;
 posttest_dur = .8;
 
 reaction_keys = {'RightArrow','LeftArrow'};
-reaction_key_codes = 'RL'; % 'c' for 0, 'v' for 1 etc.
-% feedback_texts = {'Correct','Wrong','Too Late!'};
+reaction_key_codes = 'RL';
+
+n_blk_per_trl = 3;
 
 %% Experiment
 dr = Directories(parent_path);
@@ -62,10 +63,10 @@ dat = DataFile(sub,'data',{'trial_no','cue1','cue2','cue3','shape','hemifield',.
 trg = Triggers(sub,'timestamps');
 
 
-instruction_page = TextPage(dr,'instructions');
-reaction_page = TextPage(dr,'reaction');
+
 
 scr = ExperimentScreen(viewing_distance,isSkipSyncTests).open_window().set_origin(fixation_coordinates);
+instruction_page = TextPage(dr,scr,'instructions');
 kb = ExperimentKeyboard().set_reaction_keys(reaction_keys,reaction_key_codes);
 fix = BullsEyeCrossFixation(scr);
 
@@ -88,26 +89,25 @@ arc.Right = Shape(scr,arc_left.center).add_object(arc_right,'R').add_object(arc_
 arc_left = disc.select(test_disc_id(4:6)).scale(.5).circ2arc(start_angles_left,Angle(90),SpatialUnit(scr,arc_pw)).set_color(arc_color);
 arc_right = copy(arc_left).rotate(Angle(180));
 arc.Left = Shape(scr,arc_left.center).add_object(arc_right,'R').add_object(arc_left,'L');
-% Instruction Page
-scr.draw(instruction_page).flip();
-kb.start().wait_for_next().flush().reset();
 
 disc_ids = struct('Right',[5,8,11],'Left',[14,17,20]);
 
-isCueTrial = true;
+trl.add_counter('break',n_blk_per_trl);
+isCueTrial = 1;
+isBreakTrial = 1;
 while trl.no <= trl.no_of_trials && ~kb.isEscaped
     
-%     trl = trl.add_counter('break',);
-    trl = trl.add_tracker('probes',{'E1','E2','E3','E4','E5';'L1','L2','L3','L4','L5';'A1','A2','A3','A4','A5'},{'isTarget','Location','Side'});
-    [c1,c2,c3,hem] = trl.get('C1','C2','C3','Hemifield');
-    cued_discs = disc_ids.(hem)(logical([c1,c2,c3]));    
-    if trl.no ~= sxn.initial_trial
-        [p_c1,p_c2,p_c3,p_hem] = trl.previous.get('C1','C2','C3','Hemifield');
-        isCueTrial = ~all([c1==p_c1,c2==p_c2,c3==p_c3,strcmp(hem,p_hem)]);
-    end
+     
+    trl = trl.add_tracker('probes',...
+        {'T_1','T_2','T_3','T_4','T_5';...
+        'L_1','L_2','L_3','L_4','L_5';...
+        'S_1','S_2','S_3','S_4','S_5'},{'isTarget','Location','Side'});
+    
+    cued_discs = disc_ids.(trl.Hemifield)([trl.C_1,trl.C_2,trl.C_3]==1);
+    
     
     intv = Intervals()...
-        .add_interval([],trg_brk).conditional(isBreakTrial)...
+        .add_interval(inf,trg_brk).conditional(isBreakTrial)...
         .add_interval(precue_dur,trg_fix).conditional(isCueTrial)... % fixation
         .add_interval(cue_dur,trg_cue).conditional(isCueTrial)... % Cue
         .add_interval(prestim_dur,trg_fix)... % Fixation
@@ -116,47 +116,69 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
         .add_interval(posttest_dur,trg_arr).flicker_on()...
         .add_interval(.05,trg_fix).complete().create_frames(scr,'f175',17.5,'f21',21,'f19',19);% Disc Array
     
+    
+    
     disc_clr = ones(intv.no_of_frames, disc.no_of_items);    
-    disc_clr(:,disc_ids.(hem)) = [intv.frames.f175;intv.frames.f21;intv.frames.f19]';
+    disc_clr(:,disc_ids.(trl.Hemifield)) = [intv.frames.f175;intv.frames.f21;intv.frames.f19]';
     if isCueTrial
         
-        disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frames_per_event(intv.triggers=='C')),disc_ids.(hem)) = 1;
+        disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frames_per_event(intv.triggers=='C')),disc_ids.(trl.Hemifield)) = 1;
         disc_clr(intv.initial_frames_per_event(intv.triggers=='C')+(0:intv.frames_per_event(intv.triggers=='C')),cued_discs) = 4;
         
     end
     disc.color.input(disc_clr);
     
     for whFrm = 1:intv.no_of_frames
-                
-        fix.draw();
+              
         switch intv.trigger
             
+            case 'F'
+                
+                fix.draw();
+                
             case {'C','D'}
                 
+                fix.draw();
                 disc.frame(whFrm).draw(3);
                 
-            case {'P'}
-                                
-                disc.frame(whFrm).draw(3);
+            case 'P'
                 
-                arc.(hem).(trl.probes.Side()).select(trl.probes.Location()).draw();                
+                fix.draw();                                
+                disc.frame(whFrm).draw(3);                
+                arc.(trl.Hemifield).(trl.probes.Side()).select(trl.probes.Location()).draw();
+                
+            case 'B'
+                
+                instruction_page.draw();                
+                scr.flip();
+                trg.write(trl.no,intv.trigger,scr.time);
+                kb.wait_for_next_key(intv.duration);
+                trg.write(trl.no,trg_rxn,kb.press_time);
                 
         end
         
         scr.flip();        
         kb.check().flush().quit_if_escaped();
-        trg.write_if(kb.isKeyPressed,trl.no,trg_rxn,kb.time).write_if(intv.isEventOnset,trl.no,intv.trigger,scr.time);
-        dat.write_if(kb.isKeyPressed,trl.no,trl.C1,trl.C2,trl.C3,trl.Shape,trl.Hemifield,trl.no_of_targets,trl.no_of_events,kb.key,kb.time,trg.last_time('P'),trl.probes.Location(),trl.probes.Side());
+        trg.write_if(kb.isKeyPressed,trl.no,trg_rxn,kb.press_time).write_if(intv.isIntervalOnset,trl.no,intv.trigger,scr.time);
+        dat.write_if(kb.isKeyPressed,...
+            trl.no,trl.C_1,trl.C_2,trl.C_3,trl.Shape,trl.Hemifield,trl.no_of_targets,trl.no_of_events,...
+            kb.key,kb.press_time,trg.last_time('P'),trl.probes.Location(),trl.probes.Side());
         
-        trl.probes.next(intv.isEventOffset && intv.trigger == trg_probe); 
+        trl.probes.next(intv.isIntervalOffset && intv.trigger == trg_probe); 
         intv.end();
         kb.reset();
         
     end
     
     trg.print();
-    dat.print();
-    trl.end();
+    dat.print();    
+    trl.end(); 
+    
+    % Carry these in the beginning of the loop somehow
+    isCueTrial = any(table2array(trl.isConditionSwitch(:,["C_1","C_2","C_3","Hemifield"]))); 
+    trl.break.next(isCueTrial);
+    isBreakTrial = trl.break.isComplete;
+    if trl.break.isComplete; trl.break.reset(); end
     
 end
 

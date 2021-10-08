@@ -22,13 +22,14 @@ classdef Frames < dynamicprops & matlab.mixin.Copyable
     
     methods
         
-        function frm = Frames(scr_or_frmrate,dur_of_frm)
+        function frm = Frames(scr_or_frmrate,dur)
             
             if isa(scr_or_frmrate,'ExperimentScreen'); frm.rate = scr_or_frmrate.frame_rate;
             else; frm.rate = scr_or_frmrate;
             end
             
-            frm.duration = dur_of_frm;                
+            if isinf(dur); dur = frm.ifi; end
+            frm.duration = dur;                
             frm.rank = 1:frm.total;
             frm.isFlickerOn = false;
             

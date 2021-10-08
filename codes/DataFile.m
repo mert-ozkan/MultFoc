@@ -178,10 +178,7 @@ classdef DataFile < handle
             
             tbl = readtable(df.file_path);
             
-        end
-        
-        function op = last_when(df,var_name)
-        end
+        end        
         
     end
     

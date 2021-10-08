@@ -1,56 +1,67 @@
-function trl_ord = create_trial_order()
+function ord = create_trial_order()
 
-cond = sortrows(readtable('./conditions.csv'),'Shape','ascend');
+cue_blocks = readtable('./conditions.csv');
+n_blk = height(cue_blocks);
+n_trl_per_blk = 4;
+n_trl = n_blk*n_trl_per_blk;
+dist_nept = [1,2,2,3,3,4,4,4,4,4,4,4,4,5];
+n_max_ev = max(dist_nept);
+validity = .8;
+cue_blocks.condition = join([cue_blocks.Hemifield,cue_blocks.Shape,string(cue_blocks.C2),string(cue_blocks.C3)]);
 
-nept = [repmat(2,1,4), repmat(3,1,12), repmat(4,1,28), repmat(5,1,4)];
-no_of_trl_pc = length(nept); % no of trials per cond
-
-cond_lst = join([cond.Shape, cond.Hemifield],'_');
-
-cond_rep = arrayfun(@(x)  no_of_trl_pc/sum(strcmp(cond_lst,x)),cond_lst);
-
-trl_ord = arrayfun(@(x) repmat(cond(x,:),cond_rep(x),1),1:height(cond),'UniformOutput',false);
-trl_ord = vertcat(trl_ord{:});
-
-no_of_events = arrayfun(@(x) vecshuffle(nept)',unique(cond_lst),'UniformOutput',false);
-trl_ord.no_of_events = vertcat(no_of_events{:});
-
-trl_ord.block = repelem(vecshuffle(1:(height(trl_ord)/12)),1,12)';
-trl_ord = sortrows(trl_ord,'block');
-
-n_trl = height(trl_ord);
-ev = zeros(n_trl,5);
-loc = zeros(n_trl,5);
-arc = repmat('',n_trl,5);
-
-for whTrl = 1:n_trl
-    n_ev = trl_ord.no_of_events(whTrl);
-    cueN = table2array(trl_ord(whTrl,1:3));
+while any(strcmp(cue_blocks.condition(1:end-1),cue_blocks.condition(2:end)))
     
-    switch trl_ord.Shape{whTrl}; case 'Broad'; p_tar = 1; otherwise; p_tar = .8; end
-    evN = binornd(1,p_tar,1,n_ev);
-    % Broad
-    loc(whTrl,1:n_ev) = arrayfun(@(x) pick_at_random(find(cueN==x)), evN);    
-    ev(whTrl,1:n_ev) = evN;
-    arc(whTrl,1:n_ev) = arrayfun(@(x) pick_at_random(['L','R']), evN);
-end
-trl_ord.no_of_targets = sum(ev,2); 
-trl_ord = [trl_ord, array2table([ev,loc],'VariableNames',{'E1','E2','E3','E4','E5','L1','L2','L3','L4','L5'}),...
-    array2table(arc,'VariableNames',{'A1','A2','A3','A4','A5'})];
-
+    cue_blocks = cue_blocks(randperm(n_blk),:);     
+    
 end
 
-function arr = vecshuffle(arr)
-
-n_col = size(arr,2);
-arr = arr(randperm(n_col));
-
+ord = cell(n_trl,10);
+for whBlk = 1:n_blk
+    
+    for whTrlInBlk = 1:n_trl_per_blk
+        
+        shapeN = cue_blocks.Shape{whBlk};
+        hemN = cue_blocks.Hemifield{whBlk};
+        cueN = cue_blocks{whBlk,3:5};
+        
+        whTrl = (whBlk-1)*n_trl_per_blk + whTrlInBlk;
+        neptN = dist_nept(randi(length(dist_nept)));
+        isTargetN = zeros(1,n_max_ev);
+        if strcmp(shapeN,'Broad')
+            
+            tar = ones(1,neptN);
+            
+        else
+            
+            tar = binornd(1,validity,1,neptN);
+            
+        end
+        isTargetN(1:neptN) = tar;
+        sideN = repmat(" ",1,n_max_ev);
+        sideN(1:neptN) = arrayfun(@(x) pick_one("L","R"),1:neptN);
+        
+        locN = zeros(1,n_max_ev);
+        locN(1:neptN) = arrayfun(@(x) pick_one(find(cueN==x)), isTargetN(1:neptN));
+        
+        
+        ord(whTrl,:) = {whTrl,whBlk,shapeN,hemN,cueN,sum(isTargetN),neptN,isTargetN,sideN,locN};
+        
+    end
+    
 end
 
-function y = pick_at_random(arr)
+ord = cell2table(ord,'VariableNames',{'Trial','Block','Shape','Hemifield','C','no_of_targets','no_of_events','T','S','L'});
+end
+function slxn = pick_one(varargin)
 
-len = length(arr);
+n = length(varargin);
 
-y = arr(binornd(len-1,1/len)+1);
+if n == 1
+    n = length(varargin{1});
+    slxn = varargin{1}(randi(n));
+else
+    slxn = varargin{randi(n)};
+end
+
 
 end

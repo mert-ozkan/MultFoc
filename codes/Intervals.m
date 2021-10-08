@@ -2,8 +2,6 @@ classdef Intervals < matlab.mixin.Copyable
     
     properties
         
-        onsets double
-        offsets double
         current uint64 = 1
         durations double
         triggers char          
@@ -17,23 +15,33 @@ classdef Intervals < matlab.mixin.Copyable
         
         no_of_intervals
         no_of_frames
+        onsets double
+        offsets double
         onset
         offset
         duration
         trigger
         initial_frames_per_event
         final_frames_per_event
-        isEventOnset
-        isEventOffset
+        isIntervalOnset % only when you use frames
+        isIntervalOffset % only when you use frames
         
     end
     
     properties (Access = private)
         
+        initiation_time
         intervalF struct = struct('type',[],'trigger',[],'isCreateEvent',[])
         isCreateEvent logical
         isFlickerOn logical
         isIndefinite logical
+        interval_onset double
+        isInterruptible logical % develop this to interrupt events
+        
+    end
+    
+    properties (Dependent, Access = private)
+             
         
     end
     
@@ -41,7 +49,8 @@ classdef Intervals < matlab.mixin.Copyable
         
         function intv = Intervals()
             
-            intv.onsets = GetSecs;
+            intv.initiation_time = GetSecs;
+            intv.interval_onset = intv.initiation_time;
             
         end
         
@@ -51,10 +60,13 @@ classdef Intervals < matlab.mixin.Copyable
             intv.triggers(end+1) = trg;
             intv.isCreateEvent = true;
             intv.isFlickerOn(end+1) = false;
+            intv.isIndefinite(end+1) = false;
+            if isinf(dur);  intv = intv.indefinite(); end
             
             intv.intervalF.type = 'constant';
             intv.intervalF.trigger = trg;
             intv.intervalF.isCreateEvent = true;
+            
             
         end
         
@@ -71,7 +83,16 @@ classdef Intervals < matlab.mixin.Copyable
             intv.intervalF.type = 'conditional';
             intv.intervalF.isCreateEvent = isCreateEvent;
             
-        end        
+        end
+        
+        function intv = indefinite(intv)
+            
+            if ~intv.isCreateEvent; return; end
+            intv.isIndefinite(end) = true;
+            
+            intv.intervalF.type = 'indefinite';            
+                        
+        end
         
         function intv = jitter(intv,val)
             
@@ -132,9 +153,7 @@ classdef Intervals < matlab.mixin.Copyable
                 intv.durations(repeating_events(2,:)) = [];
                 intv.triggers(repeating_events(1,:)) = [];
                 intv.isFlickerOn(repeating_events(1,:)) = [];
-            end
-            intv.onsets = intv.onsets + [0, arrayfun(@(x) sum(intv.durations(1:x)), 1:intv.no_of_intervals-1)];
-            intv.offsets = intv.onsets+intv.durations;
+            end            
             
         end        
         
@@ -142,12 +161,21 @@ classdef Intervals < matlab.mixin.Copyable
             
             if isempty(intv.frames)
                 
-                intv.current = intv.current + 1;
+                intv.durations(intv.current) = GetSecs - intv.interval_onset;
+                intv.interval_onset = GetSecs;
+                intv.current = intv.current + 1;                
                 
             else
                 
+                if intv.isIntervalOffset
+                    
+                    intv.durations(intv.current) = GetSecs - intv.interval_onset;
+                    intv.interval_onset = GetSecs;
+                    
+                end                
                 intv.frames.end();
                 intv.current = find(intv.frames.no>=intv.initial_frames_per_event,1,'last');
+                
                 
             end
             
@@ -201,6 +229,19 @@ classdef Intervals < matlab.mixin.Copyable
         function n = get.no_of_intervals(intv)
             
             n = length(intv.durations);
+            
+        end
+        
+         function t = get.onsets(intv)
+             
+             t = cumsum([intv.initiation_time, intv.durations(1:end-1)]);
+
+            
+        end
+        
+        function t = get.offsets(intv)
+            
+            t = intv.onsets + intv.durations;
             
         end
         
@@ -275,14 +316,16 @@ classdef Intervals < matlab.mixin.Copyable
             
         end
         
-        function isNew = get.isEventOnset(intv)
+        function isNew = get.isIntervalOnset(intv)
             
+            % only when you use frames
             isNew = ismember(intv.frames.no,intv.initial_frames_per_event);
             
         end
         
-        function isNew = get.isEventOffset(intv)
+        function isNew = get.isIntervalOffset(intv)
             
+            % only when you use frames
             isNew = ismember(intv.frames.no,intv.final_frames_per_event);
             
         end

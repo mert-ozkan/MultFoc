@@ -2,23 +2,35 @@ classdef TextPage < handle
     
     properties
         
+        screen
         text
-        color = [255,255,255,255]
+        color = [255,255,255,255]        
+        
+    end
+    
+    properties (Access = private)
+        
         isDynamic = false
         
     end
     
     methods
         
-        function pg = TextPage(dr,text_name,isDynamic)
+        function pg = TextPage(dr,scr,text_name)
             
-            if nargin < 2 || isempty(text_name)
+            if nargin < 3 || isempty(text_name)
                 pg.text = '';
             else
                 pg.text = char(join(dr.get_text(text_name),'\n'));
             end
             
-            if nargin > 2; pg.isDynamic = isDynamic; end
+            pg.screen = scr;          
+                        
+        end
+        
+        function pg = dynamic(pg)
+            
+            pg.isDynamic = true;
             
         end
         
@@ -28,7 +40,7 @@ classdef TextPage < handle
             
         end
         
-        function scr = draw(pg,scr,varargin)
+        function draw(pg,varargin)
             
             if pg.isDynamic; txt = sprintf(pg.text,varargin{:});
             elseif iscell(pg.text) && length(pg.text) > 1
@@ -36,7 +48,7 @@ classdef TextPage < handle
             else; txt = pg.text;
             end
             
-            DrawFormattedText(scr.pointer, txt,'center','center',pg.color,[],[],[],1.5);
+            DrawFormattedText(pg.screen.pointer, txt,'center','center',pg.color,[],[],[],1.5);
             
         end
         
