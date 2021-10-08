@@ -108,8 +108,8 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
     
     intv = Intervals()...
         .add_interval(inf,trg_brk).conditional(isBreakTrial)...
-        .add_interval(precue_dur,trg_fix).conditional(isCueTrial)... % fixation
-        .add_interval(cue_dur,trg_cue).conditional(isCueTrial)... % Cue
+...         .add_interval(precue_dur,trg_fix).conditional(isCueTrial)... % fixation
+        .add_interval(inf,trg_cue).conditional(isCueTrial)... % Cue
         .add_interval(prestim_dur,trg_fix)... % Fixation
         .add_interval(pretest_dur,trg_arr).flicker_on()... % Disc Array
         .add_interval(test_dur,trg_arr).add_random_probes(probe_dur,trl.no_of_events,trg_probe,min_isi).flicker_on()... % Testing
@@ -136,10 +136,19 @@ while trl.no <= trl.no_of_trials && ~kb.isEscaped
                 
                 fix.draw();
                 
-            case {'C','D'}
+            case 'D'
                 
                 fix.draw();
                 disc.frame(whFrm).draw(3);
+                
+            case 'C'
+                
+                fix.draw();
+                disc.frame(whFrm).draw(3);
+                scr.flip();
+                trg.write(trl.no,intv.trigger,scr.time);
+                kb.wait_for_next_key(intv.duration);
+                trg.write(trl.no,trg_rxn,kb.press_time);
                 
             case 'P'
                 
