@@ -287,6 +287,35 @@ classdef Intervals < matlab.mixin.Copyable
             
         end
         
+        function frm_no = get_first_frame(intv,trg)
+            
+            frm_no = intv.initial_frames_per_event(intv.triggers==trg);
+            
+        end
+        
+        function frm_no = get_last_frame(intv,trg)
+            
+            frm_no = intv.final_frames_per_event(intv.triggers==trg);
+            
+        end
+        
+        function frm_range = get_frame_range(intv,trg)
+            
+            frm_range = [intv.get_first_frame(trg)',intv.get_last_frame(trg)'];
+            
+        end
+        
+        function frms = get_frame_no(intv,trg)
+            
+            lst = intv.get_frame_range(trg);
+            frms = [];
+            for whRow = 1:size(lst,1)
+                frms = [frms,lst(whRow,1):lst(whRow,2)];
+            end
+            
+            
+        end
+        
         function intv = create_frames(intv,scr,varargin)
             
             intv.frames = Frames.empty();

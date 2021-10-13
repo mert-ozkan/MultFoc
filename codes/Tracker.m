@@ -47,8 +47,11 @@ classdef Tracker < dynamicprops
             
             for whGru = 1:trck.no_of_groups
                 
-                [trck.values{whGru,:}] = get(obj,trck.names{whGru,:});
-                
+                val = get(obj,trck.names(whGru,:));
+                if ~iscell(val)
+                    val = num2cell(val);
+                end
+                [trck.values{whGru,:}] = val{:};
                 trck = trck.add_method(call_names{whGru},@() trck.values{whGru,trck.step});
                 
             end

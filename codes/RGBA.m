@@ -139,7 +139,18 @@ classdef RGBA < matlab.mixin.Copyable
         function clr = change_transparency(clr)
         end
         
-        function clr = change_color(clr)
+        function clr = change(clr, rgba, idx, frm_no)
+            
+            if nargin < 3 || isempty(idx); idx = 1:clr.no_of_items; end
+            if nargin < 4 || isempty(frm_no); frm_no = 1:clr.no_of_frames; end
+            if clr.isLUT
+                
+                clr.items(frm_no,idx) = rgba;
+                
+            else
+            end                         
+            
+            
         end       
         
         

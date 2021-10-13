@@ -101,11 +101,7 @@ classdef CircleObject < matlab.mixin.Copyable
         
         function circ = change_color(circ,varargin)
             
-            if length(varargin) == 1
-                circ = circ.set_color(varargin{1});
-            else
-                circ.color(:,varargin{2}) = repmat(varargin{1},1,size(varargin{2},2));
-            end
+            circ.color.change(varargin{:});
             
         end
         

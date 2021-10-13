@@ -77,7 +77,7 @@ classdef Participant < handle
             if sub.isNew
                                 
                 trl_ord = create_trial_order();
-                writetable(trl_ord,sub.file.trial_order);
+                trl_ord.print(sub.file.trial_order);
                 
             end
                 

@@ -24,7 +24,7 @@ classdef Frames < dynamicprops & matlab.mixin.Copyable
         
         function frm = Frames(scr_or_frmrate,dur)
             
-            if isa(scr_or_frmrate,'ExperimentScreen'); frm.rate = scr_or_frmrate.frame_rate;
+            if isa(scr_or_frmrate,'ExperimentScreen'); frm.rate = round(scr_or_frmrate.frame_rate);
             else; frm.rate = scr_or_frmrate;
             end
             

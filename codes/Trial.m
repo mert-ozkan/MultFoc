@@ -104,11 +104,17 @@ classdef Trial < dynamicprops & matlab.mixin.Copyable
             
             if trl.no ~= 1
                 
-                prev_var = cell(1,trl.no_of_variables);
-                var = prev_var;
-                [var{:}] = trl.get(trl.variables{:});
-                [prev_var{:}] = trl.previous.get(trl.variables{:}); 
-                isSwitch = array2table(cellfun(@(x,y) length(x) ~= length(y) || all(x~=y), var,prev_var),'VariableNames',trl.variables);
+                var = trl.get(trl.variables{:});
+                prev_var = trl.previous.get(trl.variables{:}); 
+                if iscell(var)
+                    
+                    isSwitch = array2table(cellfun(@(x,y) length(x) ~= length(y) || all(x~=y), var,prev_var),'VariableNames',trl.variables);
+                
+                else
+                    
+                    isSwitch = array2table(arrayfun(@(x,y) length(x) ~= length(y) || all(x~=y), var,prev_var),'VariableNames',trl.variables);
+                    
+                end
                 
             else
                 
@@ -120,9 +126,17 @@ classdef Trial < dynamicprops & matlab.mixin.Copyable
             
         end
         
-        function varargout = get(trl,varargin)
+        function op = get(trl,varargin)
             
-            varargout = cellfun(@(x) trl.(x),varargin,'UniformOutput',false);
+            op = cellfun(@(x) trl.(x),varargin,'UniformOutput',false);
+            types = cellfun(@(x) class(x),op,'UniformOutput',false);
+            if length(unique(types)) == 1 && strcmp(types{1},'double')
+                
+                op = cellfun(@(x) x, op);
+                op = op(~isnan(op));
+                
+            end
+            
             
         end
         

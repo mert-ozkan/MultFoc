@@ -5,6 +5,13 @@ classdef Triggers < DataFile
         last_trigger
         last_trigger_time
         last_trigger_trial
+        last_trigger_id
+        
+    end
+    
+    properties (Access = private)
+        
+        id = 0
         
     end
     
@@ -12,7 +19,7 @@ classdef Triggers < DataFile
         
         function trg = Triggers(varargin)
             
-            trg = trg@DataFile(varargin{:},{'trial_no','trigger','time'});           
+            trg = trg@DataFile(varargin{:},{'trial_no','trigger','time','id'});           
             
         end
         
@@ -52,6 +59,21 @@ classdef Triggers < DataFile
             op = trg.data{end,3};
             
         end
+        
+        function op = get.last_trigger_id(trg)
+            
+            op = trg.data{end,4};
+            
+        end
+        
+        function trg = write(trg,varargin)
+                        
+            trg.id = trg.id + 1;
+            varargin{end+1} = trg.id;            
+            write@DataFile(trg,varargin{:});            
+                        
+        end
+        
     end
     
 end
